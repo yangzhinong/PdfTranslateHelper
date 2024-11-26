@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,6 +14,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Xml.Linq;
 
 namespace PdfTranslateHelper
 {
@@ -36,18 +38,34 @@ namespace PdfTranslateHelper
                       .Replace("\n", " ")
                       .Replace("  ", " ");
                 Clipboard.SetText(s);
-                txt.Text= s;
-                Browser.ExecuteScriptAsync("document.querySelector('textarea').value='" + s + "'");
                 Browser.Focus();
-
+                txt.Text= s;
+                
+                var sbCmd= new StringBuilder();
+                sbCmd.Append("document.querySelector('textarea').value='" + s.Replace("'", "\\'") + "'; ");
+                //sbCmd.Append("document.querySelector('textarea').focus(); ");
+                //sbCmd.Append("document.querySelector('textarea').sendkey('Enter'); ");
+                var strCmd = sbCmd.ToString();
+                Browser.ExecuteScriptAsync(strCmd);
+                
                 KeyboardToolkit.Keyboard.Type(Key.Enter);
+                Task.Run(() =>
+                {
+                    Thread.Sleep(1000);
+                    Dispatcher.Invoke(() =>
+                    {
+                        Browser.GetBrowserHost().SendMouseWheelEvent(new MouseEvent() { }, 0, -5000);
+                    });
+                });
             }
         }
 
         private void txt_DragEnter(object sender, DragEventArgs e)
         {
+            
             if (e.Data.GetDataPresent(DataFormats.Text) ){ 
                 e.Effects = DragDropEffects.Copy;
+                Clipboard.Clear();
             }
         }
 
@@ -55,26 +73,12 @@ namespace PdfTranslateHelper
         {
             if (e.Data.GetDataPresent(DataFormats.Text))
             {
-                txt.Clear();
                 var s= (string) e.Data.GetData(DataFormats.Text);
                 s = s.Replace("\r", " ")
                      .Replace("\n", " ")
                      .Replace("  ", " ");
                 Clipboard.SetText(s);
-                
                 txt.Text = s;
-
-                Task.Run(() =>
-                {
-                    System.Threading.Thread.Sleep(200);
-                    this.Dispatcher.Invoke(() =>
-                    {
-                        Browser.ExecuteScriptAsync("document.querySelector('textarea').value='" + s + "'");
-                        Browser.Focus();
-
-                        KeyboardToolkit.Keyboard.Type(Key.Enter);
-                    });
-                });
             }
         }
         private void btnBaidu_Click(object sender, RoutedEventArgs e)
@@ -86,5 +90,6 @@ namespace PdfTranslateHelper
         {
             Browser.Address = "https://translate.google.com/?hl=zh-cn&sl=auto&tl=zh-CN&op=translate";
         }
+
     }
 }

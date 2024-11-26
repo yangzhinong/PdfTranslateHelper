@@ -18,10 +18,14 @@
         <StackPanel Orientation="Horizontal">
             <Button Padding="6" x:Name="btnBaidu" Click="btnBaidu_Click" Visibility="Collapsed">百度</Button>
             <Button Margin="5,0" Padding="6" x:Name="btnGoogle" Click="btnGoogle_Click">Google</Button>
-            <Button Click="Button_Click" Padding="6" >获取剪切板内容/翻译</Button>
+            <Button  x:Name="btnGo" Click="Button_Click" Padding="6" >获取剪切板内容/翻译</Button>
+            <Rectangle AllowDrop="True"
+                       Fill="Blue" Width="25" x:Name="rectDrag"
+                       DragDrop.DragEnter="txt_DragEnter" 
+                       DragDrop.Drop="txt_Drop"
+                       Margin="10,0,0,0" />
         </StackPanel>
-        <TextBox DragDrop.DragEnter="txt_DragEnter" 
-                 DragDrop.Drop="txt_Drop"
+        <TextBox AllowDrop="False"
                  x:Name="txt" Grid.Row="2" MaxLength="500" 
                 TextWrapping="Wrap" 
                 VerticalScrollBarVisibility="Visible"
